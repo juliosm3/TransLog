@@ -1,0 +1,56 @@
+generator client {
+      provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  rol       Rol      @default(OPERADOR)
+  events    ShipmentEvent[]
+}
+
+enum Rol {
+  OPERADOR
+  SUPERVISOR
+}
+
+model Shipment {
+  id                 String   @id @default(uuid())
+  trackingCode       String   @unique
+  direccionOrigen    String
+  direccionDestino   String
+  nombreDestinatario String
+  telefono           String?
+  peso               Float
+  estado             ShipmentStatus   @default(CREATED)
+  fechaEntrega       DateTime?
+  events      ShipmentEvent[]
+}
+
+enum ShipmentStatus {
+  CREATED
+  IN_WAREHOUSE
+  IN_TRANSIT
+  OUT_FOR_DELIVERY
+  DELIVERED
+  RETURNED
+  CANCELLED
+}
+
+model ShipmentEvent {
+  id          String   @id @default(uuid())
+  shipmentId  String
+  shipment    Shipment @relation(fields: [shipmentId], references: [id])
+  estado      ShipmentStatus
+  fecha       DateTime @default(now())
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  ubicacion   String
+  notas       String?
+}
